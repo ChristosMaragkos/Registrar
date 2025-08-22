@@ -1,0 +1,9 @@
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.AssemblyInfoInputs.cache
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.AssemblyInfo.cs
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.csproj.CoreCompileInputs.cache
+C:\Users\chris\RiderProjects\Registrar\Registrar\bin\Debug\netstandard2.1\Registrar.deps.json
+C:\Users\chris\RiderProjects\Registrar\Registrar\bin\Debug\netstandard2.1\Registrar.dll
+C:\Users\chris\RiderProjects\Registrar\Registrar\bin\Debug\netstandard2.1\Registrar.pdb
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.dll
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.pdb

@@ -1,0 +1,11 @@
+C:\Users\chris\RiderProjects\Registrar\Registrar\bin\Debug\net8.0\Registrar.deps.json
+C:\Users\chris\RiderProjects\Registrar\Registrar\bin\Debug\net8.0\Registrar.dll
+C:\Users\chris\RiderProjects\Registrar\Registrar\bin\Debug\net8.0\Registrar.pdb
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\Registrar.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\Registrar.AssemblyInfoInputs.cache
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\Registrar.AssemblyInfo.cs
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\Registrar.csproj.CoreCompileInputs.cache
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\Registrar.dll
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\refint\Registrar.dll
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\Registrar.pdb
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\ref\Registrar.dll
