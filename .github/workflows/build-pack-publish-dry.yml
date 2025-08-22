@@ -1,0 +1,51 @@
+name: Release NuGet Package (Dry Run)
+
+on:
+  workflow_dispatch:
+    inputs:
+      configuration:
+        description: 'Build configuration'
+        required: false
+        default: 'Release'
+        type: choice
+        options: ['Debug','Release']
+
+jobs:
+  build-pack-dryrun:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+            8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore Registrar.sln
+
+      - name: Build solution
+        run: dotnet build Registrar.sln --configuration ${{ inputs.configuration }} --no-restore
+
+      - name: Test
+        run: dotnet test Registrar.sln --configuration ${{ inputs.configuration }} --no-build --logger "trx;LogFileName=test_results.trx"
+
+      - name: Pack (Core only)
+        run: dotnet pack Core/Registrar.csproj --configuration ${{ inputs.configuration }} --no-build --output ./nupkg
+
+      - name: Upload NuGet package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkg-${{ inputs.configuration }}
+          path: ./nupkg/*.nupkg
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ inputs.configuration }}
+          path: '**/TestResults/*.trx'
