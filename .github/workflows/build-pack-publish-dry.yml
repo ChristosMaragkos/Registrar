@@ -35,7 +35,7 @@ jobs:
         run: dotnet test Registrar.sln --configuration ${{ inputs.configuration }} --no-build --logger "trx;LogFileName=test_results.trx"
 
       - name: Pack (Core only)
-        run: dotnet pack Core/Registrar.csproj --configuration ${{ inputs.configuration }} --no-build --output ./nupkg
+        run: dotnet pack Registrar/Registrar.csproj --configuration ${{ inputs.configuration }} --no-build --output ./nupkg
 
       - name: Upload NuGet package artifact
         uses: actions/upload-artifact@v4
