@@ -23,6 +23,11 @@ namespace Registrar.Base
         {
             return Registry<T>.Register(registry, identifier, content);
         }
+        
+        public static T Register<T>(Registry<T> registry, string identifier, T content) where T : class
+        {
+            return Registry<T>.Register(registry, Identifier.TryParse(identifier), content);
+        }
     }
     
     /// <summary>
@@ -49,7 +54,7 @@ namespace Registrar.Base
         /// <summary>
         /// Maps raw numerical IDs to their corresponding content.
         /// </summary>
-        private protected readonly Dictionary<int, T> EntriesByRawId 
+        private readonly Dictionary<int, T> _entriesByRawId 
             = new Dictionary<int, T>();
         
         /// <summary>
@@ -66,7 +71,7 @@ namespace Registrar.Base
                     out var registeredValue)) return registeredValue;
 
             registry._entriesByIdentifier[identifier] = content;
-            registry.EntriesByRawId[registry._nextRawId] = content;
+            registry._entriesByRawId[registry._nextRawId] = content;
             registry._nextRawId++;
             return content;
         }
@@ -92,7 +97,7 @@ namespace Registrar.Base
         /// <returns>The content associated with the raw ID, or the fallback value if not found.</returns>
         public T? GetByRawId(int rawId)
         {
-            return EntriesByRawId.TryGetValue(rawId, out var registeredValue)
+            return _entriesByRawId.TryGetValue(rawId, out var registeredValue)
                 ? registeredValue
                 : GetValueOnFail();
         }
@@ -114,7 +119,7 @@ namespace Registrar.Base
         /// <returns>True if the raw ID exists in the registry; otherwise, false.</returns>
         public bool ContainsRawId(int rawId)
         {
-            return EntriesByRawId.ContainsKey(rawId);
+            return _entriesByRawId.ContainsKey(rawId);
         }
 
         /// <summary>
@@ -140,9 +145,9 @@ namespace Registrar.Base
         /// raw ID if not found.</returns>
         public int? GetRawId(T value)
         {
-            return !EntriesByRawId.ContainsValue(value)
+            return !_entriesByRawId.ContainsValue(value)
                 ? GetRawIdOnFail()
-                : EntriesByRawId.First(kv => kv.Value == value).Key;
+                : _entriesByRawId.First(kv => kv.Value == value).Key;
         }
         
         /// <summary>
@@ -153,7 +158,7 @@ namespace Registrar.Base
         /// <returns></returns>
         public T GetRandom(Random random)
         {
-            return EntriesByRawId[random.Next(EntriesByRawId.Count)];
+            return _entriesByRawId[random.Next(_entriesByRawId.Count)];
         }
 
         /// <summary>
