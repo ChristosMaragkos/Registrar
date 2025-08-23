@@ -35,30 +35,33 @@ namespace Registrar.Base
     /// Supports registration by <see cref="Identifier"/> as well as retrieval by <see cref="Identifier"/> 
     /// or raw numerical ID. Implements <see cref="IEnumerable{T}"/>
     /// to allow enumeration of stored entries.
+    /// <para></para>
+    /// Registries can be frozen to prevent further modifications,
+    /// ensuring thread-safe read operations without locks.
+    /// Once frozen, any attempt to register new entries will throw an exception.
     /// </summary>
     /// <typeparam name="T">The type of content this Registry
     /// instance stores. Must be a reference type.</typeparam>
-    public abstract class Registry<T> : IEnumerable<T> where T : class
+    public abstract class Registry<T> : IEnumerable<T>, IFreezableRegistry where T : class
     {
         private readonly object _lock = new object();
-        
-        /// <summary>
-        /// Tracks the next available raw numerical ID for registration.
-        /// </summary>
         private int _nextRawId;
+        private readonly Dictionary<Identifier, T> _entriesByIdentifier = new Dictionary<Identifier, T>();
+        private readonly Dictionary<int, T> _entriesByRawId = new Dictionary<int, T>();
+        // New reverse lookup dictionaries
+        private readonly Dictionary<T, Identifier> _identifierByValue; // one-to-one enforced
+        private readonly Dictionary<T, int> _rawIdByValue;
 
-        /// <summary>
-        /// Maps <see cref="Identifier"/> keys to their corresponding content.
-        /// </summary>
-        private readonly Dictionary<Identifier, T> _entriesByIdentifier 
-            = new Dictionary<Identifier, T>();
+        private volatile bool _frozen;
 
-        /// <summary>
-        /// Maps raw numerical IDs to their corresponding content.
-        /// </summary>
-        private readonly Dictionary<int, T> _entriesByRawId 
-            = new Dictionary<int, T>();
-        
+        public bool IsFrozen => _frozen;
+
+        protected Registry(IEqualityComparer<T>? comparer = null)
+        {
+            var valueComparer = comparer ?? EqualityComparer<T>.Default;
+            _identifierByValue = new Dictionary<T, Identifier>(valueComparer);
+            _rawIdByValue = new Dictionary<T, int>(valueComparer);
+        }
         /// <summary>
         /// Registers a new entry in the registry with the specified identifier and content.
         /// If the identifier already exists, the existing content is returned.
@@ -69,14 +72,30 @@ namespace Registrar.Base
         /// <returns>The registered content, either newly added or already existing.</returns>
         protected internal static T Register(Registry<T> registry, Identifier identifier, T content)
         {
+            // Fast path: prevent entering lock if already frozen and known to reject
+            if (registry._frozen)
+                throw new InvalidOperationException("Registry is already frozen");
             lock (registry._lock)
             {
-                if (registry._entriesByIdentifier.TryGetValue(identifier, 
-                        out var registeredValue)) return registeredValue;
+                if (registry._frozen)
+                    throw new InvalidOperationException("Registry is already frozen");
+                if (registry._entriesByIdentifier.TryGetValue(identifier, out var registeredValue))
+                    return registeredValue; // id already present, return existing value
+                // Enforce uniqueness of value -> identifier
+                if (registry._identifierByValue.TryGetValue(content, out var existingId))
+                {
+                    // If same identifier, treat as idempotent (shouldn't happen since earlier check). If different, throw.
+                    return !existingId.Equals(identifier) 
+                        ? throw new InvalidOperationException($"Value already registered under identifier '{existingId}'. Duplicate registration with '{identifier}' is not allowed.") : content;
+                }
+
+                var rawId = registry._nextRawId;
+                registry._nextRawId++;
 
                 registry._entriesByIdentifier[identifier] = content;
-                registry._entriesByRawId[registry._nextRawId] = content;
-                registry._nextRawId++;
+                registry._entriesByRawId[rawId] = content;
+                registry._identifierByValue[content] = identifier;
+                registry._rawIdByValue[content] = rawId;
                 return content;
             }
         }
@@ -89,6 +108,8 @@ namespace Registrar.Base
         /// <returns>The content associated with the identifier, or the fallback value if not found.</returns>
         public T? Get(Identifier identifier)
         {
+            if (_frozen)
+                return _entriesByIdentifier.TryGetValue(identifier, out var v) ? v : GetValueOnFail();
             lock (_lock)
             {
                 return _entriesByIdentifier.TryGetValue(identifier, out var registeredValue)
@@ -105,6 +126,8 @@ namespace Registrar.Base
         /// <returns>The content associated with the raw ID, or the fallback value if not found.</returns>
         public T? GetByRawId(int rawId)
         {
+            if (_frozen)
+                return _entriesByRawId.TryGetValue(rawId, out var v) ? v : GetValueOnFail();
             lock (_lock)
             {
                 return _entriesByRawId.TryGetValue(rawId, out var registeredValue)
@@ -120,10 +143,8 @@ namespace Registrar.Base
         /// <returns>True if the identifier exists in the registry; otherwise, false.</returns>
         public bool ContainsId(Identifier identifier)
         {
-            lock (_lock)
-            {
-                return _entriesByIdentifier.ContainsKey(identifier);
-            }
+            if (_frozen) return _entriesByIdentifier.ContainsKey(identifier);
+            lock (_lock) { return _entriesByIdentifier.ContainsKey(identifier); }
         }
 
         /// <summary>
@@ -133,10 +154,8 @@ namespace Registrar.Base
         /// <returns>True if the raw ID exists in the registry; otherwise, false.</returns>
         public bool ContainsRawId(int rawId)
         {
-            lock (_lock)
-            {
-                return _entriesByRawId.ContainsKey(rawId);
-            }
+            if (_frozen) return _entriesByRawId.ContainsKey(rawId);
+            lock (_lock) { return _entriesByRawId.ContainsKey(rawId); }
         }
 
         /// <summary>
@@ -148,11 +167,13 @@ namespace Registrar.Base
         /// identifier if not found.</returns>
         public Identifier? GetId(T value)
         {
+            if (_frozen)
+                return _identifierByValue.TryGetValue(value, out var id) ? id : GetIdentifierOnFail();
             lock (_lock)
             {
-                return !_entriesByIdentifier.ContainsValue(value)
-                    ? GetIdentifierOnFail()
-                    : _entriesByIdentifier.First(kv => kv.Value == value).Key;
+                return _identifierByValue.TryGetValue(value, out var id)
+                    ? id
+                    : GetIdentifierOnFail();
             }
         }
 
@@ -165,11 +186,15 @@ namespace Registrar.Base
         /// raw ID if not found.</returns>
         public int? GetRawId(T value)
         {
+            if (_frozen)
+                return _rawIdByValue.TryGetValue(value, out var raw) 
+                    ? raw 
+                    : GetRawIdOnFail();
             lock (_lock)
             {
-                return !_entriesByRawId.ContainsValue(value)
-                    ? GetRawIdOnFail()
-                    : _entriesByRawId.First(kv => kv.Value == value).Key;
+                return _rawIdByValue.TryGetValue(value, out var raw)
+                    ? raw
+                    : GetRawIdOnFail();
             }
         }
         
@@ -181,11 +206,17 @@ namespace Registrar.Base
         /// <returns></returns>
         public T GetRandom(Random random)
         {
+            if (_frozen)
+            {
+                return _entriesByRawId.Count == 0
+                    ? throw new InvalidOperationException("Cannot retrieve a random entry from an empty registry.")
+                    : _entriesByRawId[random.Next(_entriesByRawId.Count)];
+            }
             lock (_lock)
             {
-                return _entriesByRawId.Count == 0 ? 
+                return _entriesByRawId.Count == 0 ?
                     throw new InvalidOperationException(
-                        "Cannot retrieve a random entry from an empty registry.") 
+                        "Cannot retrieve a random entry from an empty registry.")
                     : _entriesByRawId[random.Next(_entriesByRawId.Count)];
             }
         }
@@ -195,7 +226,11 @@ namespace Registrar.Base
         /// </summary>
         public int Count
         {
-            get { lock (_lock) return _entriesByIdentifier.Count; }
+            get
+            {
+                if (_frozen) return _entriesByIdentifier.Count;
+                lock (_lock) return _entriesByIdentifier.Count;
+            }
         }
 
         /// <summary>
@@ -204,6 +239,7 @@ namespace Registrar.Base
         /// <returns>A list of all content stored in the registry.</returns>
         public List<T> ToList()
         {
+            if (_frozen) return _entriesByIdentifier.Values.ToList();
             lock (_lock)
             {
                 return _entriesByIdentifier.Values.ToList();
@@ -216,11 +252,17 @@ namespace Registrar.Base
         /// <returns>An enumerator for the content in the registry.</returns>
         public IEnumerator<T> GetEnumerator()
         {
-            // snapshot to allow safe enumeration without holding lock during iteration
             List<T> snapshot;
-            lock (_lock)
+            if (_frozen)
             {
                 snapshot = _entriesByIdentifier.Values.ToList();
+            }
+            else
+            {
+                lock (_lock)
+                {
+                    snapshot = _entriesByIdentifier.Values.ToList();
+                }
             }
             return snapshot.GetEnumerator();
         }
@@ -254,5 +296,35 @@ namespace Registrar.Base
         /// </summary>
         /// <returns>The fallback raw numerical ID.</returns>
         protected abstract int? GetRawIdOnFail();
+
+        /// <summary>
+        /// Freezes the registry, preventing further modifications.
+        /// </summary>
+        public void Freeze()
+        {
+            if (_frozen) return; // idempotent
+            lock (_lock)
+            {
+                _frozen = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Interface for registries that support freezing.
+    /// Freezing a registry prevents any further modifications,
+    /// such as adding or removing entries.
+    /// </summary>
+    public interface IFreezableRegistry
+    {
+        /// <summary>
+        /// Freezes the registry, preventing further modifications.
+        /// </summary>
+        void Freeze();
+
+        /// <summary>
+        /// Indicates whether the registry is frozen.
+        /// </summary>
+        bool IsFrozen { get; }
     }
 }
