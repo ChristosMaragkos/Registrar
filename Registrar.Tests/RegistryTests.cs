@@ -48,11 +48,11 @@ public class RegistryTests
     }
 
     [Fact]
-    public void SimpleDefaultedRegistry_GetRawIdOnFail_ReturnsNullIfDefaultNotRegistered()
+    public void SimpleDefaultedRegistry_GetRawIdOnFail_ReturnsNegative1_IfDefaultNotRegistered()
     {
         var registry =
             new SimpleDefaultedRegistry<string>("default", Identifier.FromNamespaceAndPath("namespace", "path"));
-        Assert.Null(registry.GetRawId("default"));
+        Assert.Equal(-1, registry.GetRawId("default"));
     }
 
     [Fact]
