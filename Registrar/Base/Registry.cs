@@ -40,6 +40,8 @@ namespace Registrar.Base
     /// instance stores. Must be a reference type.</typeparam>
     public abstract class Registry<T> : IEnumerable<T> where T : class
     {
+        private readonly object _lock = new object();
+        
         /// <summary>
         /// Tracks the next available raw numerical ID for registration.
         /// </summary>
@@ -67,39 +69,48 @@ namespace Registrar.Base
         /// <returns>The registered content, either newly added or already existing.</returns>
         protected internal static T Register(Registry<T> registry, Identifier identifier, T content)
         {
-            if (registry._entriesByIdentifier.TryGetValue(identifier, 
-                    out var registeredValue)) return registeredValue;
+            lock (registry._lock)
+            {
+                if (registry._entriesByIdentifier.TryGetValue(identifier, 
+                        out var registeredValue)) return registeredValue;
 
-            registry._entriesByIdentifier[identifier] = content;
-            registry._entriesByRawId[registry._nextRawId] = content;
-            registry._nextRawId++;
-            return content;
+                registry._entriesByIdentifier[identifier] = content;
+                registry._entriesByRawId[registry._nextRawId] = content;
+                registry._nextRawId++;
+                return content;
+            }
         }
 
         /// <summary>
-        /// Retrieves content from the registry by its identifier.
+        /// Retrieves content from the registry by its identifier (thread-safe).
         /// If the identifier is not found, the fallback value is returned.
         /// </summary>
         /// <param name="identifier">The identifier of the content to retrieve.</param>
         /// <returns>The content associated with the identifier, or the fallback value if not found.</returns>
         public T? Get(Identifier identifier)
         {
-            return _entriesByIdentifier.TryGetValue(identifier, out var registeredValue)
-                ? registeredValue
-                : GetValueOnFail();
+            lock (_lock)
+            {
+                return _entriesByIdentifier.TryGetValue(identifier, out var registeredValue)
+                    ? registeredValue
+                    : GetValueOnFail();
+            }
         }
 
         /// <summary>
-        /// Retrieves content from the registry by its raw numerical ID.
+        /// Retrieves content from the registry by its raw numerical ID (thread-safe).
         /// If the raw ID is not found, the fallback value is returned.
         /// </summary>
         /// <param name="rawId">The raw numerical ID of the content to retrieve.</param>
         /// <returns>The content associated with the raw ID, or the fallback value if not found.</returns>
         public T? GetByRawId(int rawId)
         {
-            return _entriesByRawId.TryGetValue(rawId, out var registeredValue)
-                ? registeredValue
-                : GetValueOnFail();
+            lock (_lock)
+            {
+                return _entriesByRawId.TryGetValue(rawId, out var registeredValue)
+                    ? registeredValue
+                    : GetValueOnFail();
+            }
         }
 
         /// <summary>
@@ -109,7 +120,10 @@ namespace Registrar.Base
         /// <returns>True if the identifier exists in the registry; otherwise, false.</returns>
         public bool ContainsId(Identifier identifier)
         {
-            return _entriesByIdentifier.ContainsKey(identifier);
+            lock (_lock)
+            {
+                return _entriesByIdentifier.ContainsKey(identifier);
+            }
         }
 
         /// <summary>
@@ -119,7 +133,10 @@ namespace Registrar.Base
         /// <returns>True if the raw ID exists in the registry; otherwise, false.</returns>
         public bool ContainsRawId(int rawId)
         {
-            return _entriesByRawId.ContainsKey(rawId);
+            lock (_lock)
+            {
+                return _entriesByRawId.ContainsKey(rawId);
+            }
         }
 
         /// <summary>
@@ -131,9 +148,12 @@ namespace Registrar.Base
         /// identifier if not found.</returns>
         public Identifier? GetId(T value)
         {
-            return !_entriesByIdentifier.ContainsValue(value)
-                ? GetIdentifierOnFail()
-                : _entriesByIdentifier.First(kv => kv.Value == value).Key;
+            lock (_lock)
+            {
+                return !_entriesByIdentifier.ContainsValue(value)
+                    ? GetIdentifierOnFail()
+                    : _entriesByIdentifier.First(kv => kv.Value == value).Key;
+            }
         }
 
         /// <summary>
@@ -145,9 +165,12 @@ namespace Registrar.Base
         /// raw ID if not found.</returns>
         public int? GetRawId(T value)
         {
-            return !_entriesByRawId.ContainsValue(value)
-                ? GetRawIdOnFail()
-                : _entriesByRawId.First(kv => kv.Value == value).Key;
+            lock (_lock)
+            {
+                return !_entriesByRawId.ContainsValue(value)
+                    ? GetRawIdOnFail()
+                    : _entriesByRawId.First(kv => kv.Value == value).Key;
+            }
         }
         
         /// <summary>
@@ -158,7 +181,21 @@ namespace Registrar.Base
         /// <returns></returns>
         public T GetRandom(Random random)
         {
-            return _entriesByRawId[random.Next(_entriesByRawId.Count)];
+            lock (_lock)
+            {
+                return _entriesByRawId.Count == 0 ? 
+                    throw new InvalidOperationException(
+                        "Cannot retrieve a random entry from an empty registry.") 
+                    : _entriesByRawId[random.Next(_entriesByRawId.Count)];
+            }
+        }
+
+        /// <summary>
+        /// Returns the total number of registered entries (thread-safe).
+        /// </summary>
+        public int Count
+        {
+            get { lock (_lock) return _entriesByIdentifier.Count; }
         }
 
         /// <summary>
@@ -167,7 +204,10 @@ namespace Registrar.Base
         /// <returns>A list of all content stored in the registry.</returns>
         public List<T> ToList()
         {
-            return _entriesByIdentifier.Values.ToList();
+            lock (_lock)
+            {
+                return _entriesByIdentifier.Values.ToList();
+            }
         }
 
         /// <summary>
@@ -176,7 +216,13 @@ namespace Registrar.Base
         /// <returns>An enumerator for the content in the registry.</returns>
         public IEnumerator<T> GetEnumerator()
         {
-            return _entriesByIdentifier.Values.GetEnumerator();
+            // snapshot to allow safe enumeration without holding lock during iteration
+            List<T> snapshot;
+            lock (_lock)
+            {
+                snapshot = _entriesByIdentifier.Values.ToList();
+            }
+            return snapshot.GetEnumerator();
         }
 
         /// <summary>
