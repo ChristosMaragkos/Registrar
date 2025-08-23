@@ -1,4 +1,3 @@
-using System.Linq;
 using Registrar.Base;
 
 namespace Registrar.Implementation
@@ -53,6 +52,8 @@ namespace Registrar.Implementation
         private readonly T _defaultValue;
 
         private readonly Identifier _defaultIdentifier;
+        
+        private readonly int _defaultRawId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SimpleDefaultedRegistry{T}"/> class
@@ -60,16 +61,17 @@ namespace Registrar.Implementation
         /// </summary>
         /// <param name="defaultValue">The default value to use as a fallback for lookups.</param>
         /// <param name="defaultIdentifier">The default identifier to use as a fallback for lookups.</param>
-        public SimpleDefaultedRegistry(T defaultValue, Identifier defaultIdentifier)
+        /// <param name="defaultRawId">The default raw numerical ID to use as a fallback for lookups.</param>
+        public SimpleDefaultedRegistry(T defaultValue, Identifier defaultIdentifier, int defaultRawId = -1)
         {
             _defaultValue = defaultValue;
             _defaultIdentifier = defaultIdentifier;
+            _defaultRawId = defaultRawId;
         }
 
         protected override int? GetRawIdOnFail()
         {
-            if (!EntriesByRawId.ContainsValue(_defaultValue)) return null;
-            return EntriesByRawId.First(kv => kv.Value == _defaultValue).Key;
+            return _defaultRawId;
         }
         
         protected override T GetValueOnFail()
@@ -82,7 +84,16 @@ namespace Registrar.Implementation
             return _defaultIdentifier;
         }
         
+        /// <summary>
+        /// Fetches the default value set for this registry.
+        /// </summary>
+        /// <returns></returns>
         public T GetDefaultValue() => _defaultValue;
+        
+        /// <summary>
+        /// Fetches the Identifier associated with the default value.
+        /// </summary>
+        /// <returns></returns>
         public Identifier GetDefaultIdentifier() => _defaultIdentifier;
     }
 }
