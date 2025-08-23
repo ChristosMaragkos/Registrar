@@ -100,3 +100,4 @@ C:\Users\chris\RiderProjects\Registrar\Registrar.Tests\obj\Debug\net8.0\refint\R
 C:\Users\chris\RiderProjects\Registrar\Registrar.Tests\obj\Debug\net8.0\Registrar.Tests.pdb
 C:\Users\chris\RiderProjects\Registrar\Registrar.Tests\obj\Debug\net8.0\Registrar.Tests.genruntimeconfig.cache
 C:\Users\chris\RiderProjects\Registrar\Registrar.Tests\obj\Debug\net8.0\ref\Registrar.Tests.dll
+C:\Users\chris\RiderProjects\Registrar\Registrar.Tests\obj\Debug\net8.0\Registrar.Tests.sourcelink.json

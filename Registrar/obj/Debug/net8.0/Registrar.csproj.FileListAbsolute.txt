@@ -9,3 +9,4 @@ C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\Registrar.dll
 C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\refint\Registrar.dll
 C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\Registrar.pdb
 C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\ref\Registrar.dll
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\Registrar.sourcelink.json

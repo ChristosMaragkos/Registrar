@@ -7,3 +7,4 @@ C:\Users\chris\RiderProjects\Registrar\Registrar\bin\Debug\netstandard2.1\Regist
 C:\Users\chris\RiderProjects\Registrar\Registrar\bin\Debug\netstandard2.1\Registrar.pdb
 C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.dll
 C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.pdb
+C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.sourcelink.json
