@@ -7,7 +7,7 @@
   "targets": {
     ".NETStandard,Version=v2.1": {},
     ".NETStandard,Version=v2.1/": {
-      "Registrar/1.0.1": {
+      "Registrar/1.0.2": {
         "runtime": {
           "Registrar.dll": {}
         }
@@ -15,7 +15,7 @@
     }
   },
   "libraries": {
-    "Registrar/1.0.1": {
+    "Registrar/1.0.2": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
