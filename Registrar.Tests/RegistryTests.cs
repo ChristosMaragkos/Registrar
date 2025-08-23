@@ -61,7 +61,7 @@ public class RegistryTests
         const string defaultValue = "default";
         var defaultIdentifier = Identifier.FromNamespaceAndPath("namespace", "path");
         var registry = new SimpleDefaultedRegistry<string>(defaultValue, defaultIdentifier);
-        SimpleRegistry<string>.Register(registry, defaultIdentifier, defaultValue);
+        Registry.Register(registry, defaultIdentifier, defaultValue);
         Assert.Equal(0, registry.GetRawId(defaultValue));
     }
 
