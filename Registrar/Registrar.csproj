@@ -3,8 +3,21 @@
     <PropertyGroup>
         <TargetFrameworks>net8.0; netstandard2.1</TargetFrameworks>
         <Authors>Christos Maragkos</Authors>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
         <Nullable>enable</Nullable>
+        <PackageId>Registrar</PackageId>
+        <Description>Lightweight namespaced identifier + registry library with freezing, reverse lookups, and thread-safe bootstrap.</Description>
+        <RepositoryUrl>https://github.com/ChristosMaragkos/Registrar</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/ChristosMaragkos/Registrar</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageTags>registry;identifiers;namespaced;game;content;freezing</PackageTags>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IncludeSymbols>false</IncludeSymbols>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="/" />
+    </ItemGroup>
 
 </Project>
