@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 namespace Registrar.Base
 {
@@ -8,7 +9,7 @@ namespace Registrar.Base
     /// It can be used to uniquely identify
     /// resources, objects, or files within a given context.
     /// The format for an identifier is "namespace:path",
-    /// where the namespace and path adhere to specific character rules.
+    /// where the namespace and path adhere to specific character rules.<para></para>
     /// The namespace must consist of lowercase letters,
     /// digits, underscores, hyphens, and periods.
     /// The path must consist of lowercase letters,
@@ -21,7 +22,7 @@ namespace Registrar.Base
     public readonly struct Identifier : IEquatable<Identifier>
     {
         
-        #if DEBUG && NET8_0
+        #if DEBUG
         public string GetNamespace_Debug() => Namespace;
         public string GetPath_Debug() => Path;
         #endif
@@ -33,9 +34,6 @@ namespace Registrar.Base
         private string Path { get; }
 
         private readonly int _hash;
-        
-        public string GetNamespace() => Namespace;
-        public string GetPath() => Path;
 
         private Identifier(string @namespace, string path)
         {
@@ -82,10 +80,11 @@ namespace Registrar.Base
         /// Attempts to parse a string in the format "namespace:path"
         /// and create an Identifier instance.
         /// The input string is validated to ensure it conforms to the expected format.
+        /// Throws on invalid input.
         /// </summary>
         /// <param name="input">The string to parse.</param>
         /// <returns>The parsed Identifier.</returns>
-        public static Identifier TryParse(string input)
+        public static Identifier Parse(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
                 throw new ArgumentException("Input cannot be null or whitespace", nameof(input));
@@ -98,6 +97,35 @@ namespace Registrar.Base
             var path = parts[1];
 
             return new Identifier(@namespace, path);
+        }
+
+        /// <summary>
+        /// Tries to parse a string in the format "namespace:path" and create a new Identifier instance.
+        /// The input string is validated to ensure it conforms to the expected format.
+        /// Returns true if parsing was successful, false otherwise.
+        /// </summary>
+        /// <param name="input">The string to parse</param>
+        /// <param name="result">The resulting Identifier</param>
+        /// <returns></returns>
+        public static bool TryParse(string input, [NotNullWhen(true)] out Identifier? result)
+        {
+            result = null;
+            
+            if (string.IsNullOrWhiteSpace(input))
+                return false;
+            
+            var parts = input.Split(':');
+            if (parts.Length != 2)
+                return false;
+            
+            var @namespace = parts[0];
+            var path = parts[1];
+            
+            if (!IsValidNamespace(@namespace) || !IsValidPath(path))
+                return false;
+            
+            result = new Identifier(@namespace, path);
+            return true;
         }
         
         public override string ToString()

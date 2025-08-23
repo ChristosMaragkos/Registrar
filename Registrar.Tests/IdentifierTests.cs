@@ -9,8 +9,8 @@ public class IdentifierTests
     {
         var identifier = Identifier.FromNamespaceAndPath("valid-namespace", "valid/path");
 
-        Assert.Equal("valid-namespace", identifier.GetNamespace());
-        Assert.Equal("valid/path", identifier.GetPath());
+        Assert.Equal("valid-namespace", identifier.GetNamespace_Debug());
+        Assert.Equal("valid/path", identifier.GetPath_Debug());
     }
 
     [Fact]
@@ -28,26 +28,61 @@ public class IdentifierTests
     }
     
     [Fact]
-    public void TryParse_ValidInput_CreatesIdentifier()
+    public void Parse_ValidInput_CreatesIdentifier()
     {
-        var identifier = Identifier.TryParse("valid-namespace:valid/path");
+        var identifier = Identifier.Parse("valid-namespace:valid/path");
         
-        Assert.Equal("valid-namespace", identifier.GetNamespace());
-        Assert.Equal("valid/path", identifier.GetPath());
+        Assert.Equal("valid-namespace", identifier.GetNamespace_Debug());
+        Assert.Equal("valid/path", identifier.GetPath_Debug());
     }
     
     [Fact]
-    public void TryParse_InvalidNamespace_ThrowsArgumentException()
+    public void Parse_InvalidNamespace_ThrowsArgumentException()
     {
         Assert.Throws<ArgumentException>(() => 
-            Identifier.TryParse("INVALID_NAMESPACE:valid/path"));
+            Identifier.Parse("INVALID_NAMESPACE:valid/path"));
     }
 
     [Fact]
-    public void TryParse_InvalidPath_ThrowsArgumentException()
+    public void Parse_InvalidPath_ThrowsArgumentException()
     {
         Assert.Throws<ArgumentException>(() => 
-            Identifier.TryParse("valid-namespace:INVALID_PATH"));
+            Identifier.Parse("valid-namespace:INVALID_PATH"));
+    }
+
+    [Fact]
+    public void Parse_MissingColon_ThrowsFormatException()
+    {
+        Assert.Throws<FormatException>(() => Identifier.Parse("invalid-format"));
+    }
+    
+    [Fact]
+    public void TryParse_ValidInput_ReturnsTrueAndSetsIdentifier()
+    {
+        var result = Identifier.TryParse("valid-namespace:valid/path", out var identifier);
+        
+        Assert.True(result);
+        Assert.NotNull(identifier);
+        Assert.Equal("valid-namespace", identifier.Value.GetNamespace_Debug());
+        Assert.Equal("valid/path", identifier.Value.GetPath_Debug());
+    }
+
+    [Fact]
+    public void TryParse_InvalidNamespace_ReturnsNull()
+    {
+        var result = Identifier.TryParse("INVALID_NAMESPACE:valid/path", out var identifier);
+        
+        Assert.False(result);
+        Assert.Null(identifier);
+    }
+
+    [Fact]
+    public void TryParse_InvalidPath_ReturnsNull()
+    {
+        var result = Identifier.TryParse("valid-namespace:INVALID_PATH", out var identifier);
+        
+        Assert.False(result);
+        Assert.Null(identifier);
     }
 
     [Fact]

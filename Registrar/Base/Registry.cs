@@ -26,7 +26,7 @@ namespace Registrar.Base
         
         public static T Register<T>(Registry<T> registry, string identifier, T content) where T : class
         {
-            return Registry<T>.Register(registry, Identifier.TryParse(identifier), content);
+            return Registry<T>.Register(registry, Identifier.Parse(identifier), content);
         }
     }
     
