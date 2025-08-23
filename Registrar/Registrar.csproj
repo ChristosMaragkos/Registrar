@@ -2,6 +2,8 @@
 
     <PropertyGroup>
         <TargetFrameworks>net8.0; netstandard2.1</TargetFrameworks>
+        <Authors>Christos Maragkos</Authors>
+        <Version>1.0.1</Version>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
