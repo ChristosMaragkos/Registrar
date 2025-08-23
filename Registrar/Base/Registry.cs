@@ -11,7 +11,7 @@ namespace Registrar.Base
     /// when calling Register.
     /// Is it petty? Yes. Do I care? Not really.
     /// It just makes the API a bit cleaner to use, and brings it closer to Minecraft's
-    /// Registry.register(Registry.BLOCK, id, block) style.
+    /// <c>Registry.register(Registry.BLOCK, id, block)</c> style.
     /// <para></para>
     /// ...which is probably not a good thing to aspire to,
     /// both because Minecraft was written in another language
@@ -65,7 +65,7 @@ namespace Registrar.Base
         /// <param name="identifier">The unique identifier for the content.</param>
         /// <param name="content">The content to register.</param>
         /// <returns>The registered content, either newly added or already existing.</returns>
-        public static T Register(Registry<T> registry, Identifier identifier, T content)
+        protected internal static T Register(Registry<T> registry, Identifier identifier, T content)
         {
             if (registry._entriesByIdentifier.TryGetValue(identifier, 
                     out var registeredValue)) return registeredValue;
