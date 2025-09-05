@@ -10,15 +10,15 @@
     <projectUrl>https://github.com/ChristosMaragkos/Registrar</projectUrl>
     <description>Lightweight namespaced identifier + registry library with freezing, reverse lookups, and thread-safe bootstrap.</description>
     <tags>registry identifiers namespaced game content freezing</tags>
-    <repository type="git" url="https://github.com/ChristosMaragkos/Registrar" commit="de7f08d678b1aadbab7f05f643c630bfe38c4526" />
+    <repository type="git" url="https://github.com/ChristosMaragkos/Registrar" commit="885664af09291c504cf4cd8cd03196f4b4cd760a" />
     <dependencies>
       <group targetFramework="net8.0" />
       <group targetFramework=".NETStandard2.1" />
     </dependencies>
   </metadata>
   <files>
-    <file src="C:\Users\chris\RiderProjects\Registrar\Registrar\bin\Debug\net8.0\Registrar.dll" target="lib\net8.0\Registrar.dll" />
-    <file src="C:\Users\chris\RiderProjects\Registrar\Registrar\bin\Debug\netstandard2.1\Registrar.dll" target="lib\netstandard2.1\Registrar.dll" />
-    <file src="C:\Users\chris\RiderProjects\Registrar\README.md" target="\README.md" />
+    <file src="D:\coding projects\csharp\Registrar\Registrar\bin\Debug\net8.0\Registrar.dll" target="lib\net8.0\Registrar.dll" />
+    <file src="D:\coding projects\csharp\Registrar\Registrar\bin\Debug\netstandard2.1\Registrar.dll" target="lib\netstandard2.1\Registrar.dll" />
+    <file src="D:\coding projects\csharp\Registrar\README.md" target="\README.md" />
   </files>
 </package>

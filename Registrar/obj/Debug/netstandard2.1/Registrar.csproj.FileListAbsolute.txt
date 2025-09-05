@@ -8,3 +8,13 @@ C:\Users\chris\RiderProjects\Registrar\Registrar\bin\Debug\netstandard2.1\Regist
 C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.dll
 C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.pdb
 C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.sourcelink.json
+D:\coding projects\csharp\Registrar\Registrar\bin\Debug\netstandard2.1\Registrar.deps.json
+D:\coding projects\csharp\Registrar\Registrar\bin\Debug\netstandard2.1\Registrar.dll
+D:\coding projects\csharp\Registrar\Registrar\bin\Debug\netstandard2.1\Registrar.pdb
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.GeneratedMSBuildEditorConfig.editorconfig
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.AssemblyInfoInputs.cache
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.AssemblyInfo.cs
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.csproj.CoreCompileInputs.cache
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.sourcelink.json
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.dll
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\netstandard2.1\Registrar.pdb

@@ -9,7 +9,7 @@ public class RegistryTests
     public void SimpleRegistry_GetValueOnFail_ReturnsNull()
     {
         var registry = new SimpleRegistry<string>();
-        Assert.Null(registry.Get(Identifier.FromNamespaceAndPath("whyareyou", "readingthis")));
+        Assert.Null(registry.Get<string>(Identifier.FromNamespaceAndPath("whyareyou", "readingthis")));
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class RegistryTests
             new SimpleDefaultedRegistry<string>(defaultValue, 
                 Identifier.FromNamespaceAndPath("namespace", "path"));
         var identifier = Identifier.FromNamespaceAndPath("not-the", "default");
-        Assert.Equal(defaultValue, registry.Get(identifier));
+        Assert.Equal(defaultValue, registry.Get<string>(identifier));
     }
 
     [Fact]
@@ -80,5 +80,16 @@ public class RegistryTests
         var defaultIdentifier = Identifier.FromNamespaceAndPath("namespace", "path");
         var registry = new SimpleDefaultedRegistry<string>("default", defaultIdentifier);
         Assert.Equal(defaultIdentifier, registry.GetDefaultIdentifier());
+    }
+
+    [Fact]
+    public void CanCreate_Registry_Of_Registries()
+    {
+        var reg = new SimpleRegistry<Registry>();
+        var reg1 = new SimpleRegistry<string>();
+        var str = Registry.Register(reg1, "test:path", "a");
+        Registry.Register(reg, "test:path1", reg1);
+        
+        Assert.True(reg.Get<Registry>(Identifier.Parse("test:path1")) == reg1);
     }
 }

@@ -17,17 +17,26 @@ namespace Registrar.Base
     /// both because Minecraft was written in another language
     /// and because Minecraft's code reads like a Unabomber manifesto.
     /// </summary>
-    public static class Registry
+    public abstract class Registry : IFreezableRegistry
     {
-        public static T Register<T>(Registry<T> registry, Identifier identifier, T content) where T : class
+        public static TT Register<T, TT>(Registry<T> registry, Identifier identifier, TT content)
+            where T : class where TT : class, T
         {
-            return Registry<T>.Register(registry, identifier, content);
+            return Registry<T>.Register(registry, identifier, content) as TT
+                   ?? throw new InvalidCastException(
+                       $"Cannot register object {content} to Registry {registry} - Types {typeof(T)} and {typeof(TT)} do not match.");
         }
-        
-        public static T Register<T>(Registry<T> registry, string identifier, T content) where T : class
+
+        public static TT Register<T, TT>(Registry<T> registry, string identifier, TT content)
+            where T : class where TT : class, T
         {
-            return Registry<T>.Register(registry, Identifier.Parse(identifier), content);
+            return Registry<T>.Register(registry, Identifier.Parse(identifier), content) as TT
+                   ?? throw new InvalidCastException(
+                       $"Cannot register object {content} to Registry {registry} - Types {typeof(T)} and {typeof(TT)} do not match.");
         }
+
+        public abstract void Freeze();
+        public abstract bool IsFrozen { get; }
     }
     
     /// <summary>
@@ -42,7 +51,7 @@ namespace Registrar.Base
     /// </summary>
     /// <typeparam name="T">The type of content this Registry
     /// instance stores. Must be a reference type.</typeparam>
-    public abstract class Registry<T> : IEnumerable<T>, IFreezableRegistry where T : class
+    public abstract class Registry<T> : Registry, IEnumerable<T> where T : class
     {
         private readonly object _lock = new object();
         private int _nextRawId;
@@ -54,7 +63,7 @@ namespace Registrar.Base
 
         private volatile bool _frozen;
 
-        public bool IsFrozen => _frozen;
+        public override bool IsFrozen => _frozen;
 
         protected Registry(IEqualityComparer<T>? comparer = null)
         {
@@ -106,15 +115,21 @@ namespace Registrar.Base
         /// </summary>
         /// <param name="identifier">The identifier of the content to retrieve.</param>
         /// <returns>The content associated with the identifier, or the fallback value if not found.</returns>
-        public T? Get(Identifier identifier)
+        public TT? Get<TT>(Identifier identifier) where TT : class, T
         {
             if (_frozen)
-                return _entriesByIdentifier.TryGetValue(identifier, out var v) ? v : GetValueOnFail();
+            {
+                if (_entriesByIdentifier.TryGetValue(identifier, out var v) && v is TT ok) return ok;
+                var fallback = GetValueOnFail();
+                return fallback as TT;
+            }
+
             lock (_lock)
             {
-                return _entriesByIdentifier.TryGetValue(identifier, out var registeredValue)
-                    ? registeredValue
-                    : GetValueOnFail();
+                if (_entriesByIdentifier.TryGetValue(identifier, out var registeredValue) &&
+                    registeredValue is TT ok) return ok;
+                var fallback = GetValueOnFail();
+                return fallback as TT;
             }
         }
 
@@ -300,7 +315,7 @@ namespace Registrar.Base
         /// <summary>
         /// Freezes the registry, preventing further modifications.
         /// </summary>
-        public void Freeze()
+        public override void Freeze()
         {
             if (_frozen) return; // idempotent
             lock (_lock)

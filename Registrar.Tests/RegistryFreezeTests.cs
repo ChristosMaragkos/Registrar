@@ -13,7 +13,7 @@ public class RegistryFreezeTests
         reg.Freeze();
         reg.Freeze();
         Assert.True(reg.IsFrozen);
-        Assert.Equal("A", reg.Get(Identifier.FromNamespaceAndPath("vanilla","a")));
+        Assert.Equal("A", reg.Get<string>(Identifier.FromNamespaceAndPath("vanilla","a")));
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class RegistryFreezeTests
         Registry.Register(reg, id, "A");
         reg.Freeze();
         Assert.True(reg.IsFrozen);
-        Assert.Equal("A", reg.Get(id));
+        Assert.Equal("A", reg.Get<string>(id));
         Assert.Equal(id, reg.GetId("A"));
         Assert.Equal(0, reg.GetRawId("A"));
         Assert.Single(reg.ToList());
@@ -75,14 +75,14 @@ public class RegistryFreezeTests
         }
         reg.Freeze();
         var tasks = new List<Task>();
-        for (int t = 0; t < 50; t++)
+        for (var t = 0; t < 50; t++)
         {
             tasks.Add(Task.Run(() =>
             {
-                for (int i = 0; i < 100; i++)
+                for (var i = 0; i < 100; i++)
                 {
                     var id = Identifier.FromNamespaceAndPath("v", $"id{i}");
-                    var v = reg.Get(id);
+                    var v = reg.Get<string>(id);
                     Assert.NotNull(v);
                 }
             }));

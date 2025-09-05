@@ -10,3 +10,15 @@ C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\refint\Registr
 C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\Registrar.pdb
 C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\ref\Registrar.dll
 C:\Users\chris\RiderProjects\Registrar\Registrar\obj\Debug\net8.0\Registrar.sourcelink.json
+D:\coding projects\csharp\Registrar\Registrar\bin\Debug\net8.0\Registrar.deps.json
+D:\coding projects\csharp\Registrar\Registrar\bin\Debug\net8.0\Registrar.dll
+D:\coding projects\csharp\Registrar\Registrar\bin\Debug\net8.0\Registrar.pdb
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\net8.0\Registrar.GeneratedMSBuildEditorConfig.editorconfig
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\net8.0\Registrar.AssemblyInfoInputs.cache
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\net8.0\Registrar.AssemblyInfo.cs
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\net8.0\Registrar.csproj.CoreCompileInputs.cache
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\net8.0\Registrar.sourcelink.json
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\net8.0\Registrar.dll
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\net8.0\refint\Registrar.dll
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\net8.0\Registrar.pdb
+D:\coding projects\csharp\Registrar\Registrar\obj\Debug\net8.0\ref\Registrar.dll
