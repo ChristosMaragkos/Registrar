@@ -37,24 +37,6 @@ Inspired by Minecraft’s model:
 
 Currently all registries can be frozen manually by calling `Freeze()`. A recommended pattern is to freeze core registries after loading vanilla + mod content.
 
-### Bootstrap Lifecycle Example
-```csharp
-public interface IRegistrar { void Register(); }
-
-public static class Items : IRegistrar {
-    public static readonly SimpleRegistry<Item> Registry = new();
-    public static readonly Item HealthPotion = Registry.Register(
-        Identifier.FromNamespaceAndPath("vanilla", "health_potion"), new Item());
-    public void Register() { /* static field initializers already executed */ }
-}
-
-public static class Bootstrap {
-    public static void Initialize(IEnumerable<IRegistrar> registrars) {
-        foreach (var r in registrars) r.Register(); // perform all registrations
-        Items.Registry.Freeze(); // freeze static registry
-    }
-}
-```
 Attempting to register AFTER freezing:
 ```csharp
 Registry.Register(Items.Registry, Identifier.FromNamespaceAndPath("vanilla","late"), new Item());
