@@ -1,5 +1,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+#if NET8_0_OR_GREATER
+using System.Text.Json;
+using System.Text.Json.Serialization;
+#endif
 using System.Text.RegularExpressions;
 namespace Registrar.Base
 {
@@ -19,6 +23,9 @@ namespace Registrar.Base
     /// Invalid identifiers, such as those with uppercase letters or special characters,
     /// will result in exceptions when attempting to create them.
     /// </summary>
+    #if NET8_0_OR_GREATER
+    [JsonConverter(typeof(IdentifierConverter))]
+    #endif
     public readonly struct Identifier : IEquatable<Identifier>
     {
         
@@ -130,7 +137,6 @@ namespace Registrar.Base
             return $"{Namespace}:{Path}";
         }
 
-        // Equality members. Do not touch.
         public bool Equals(Identifier other)
         {
             if (GetHashCode() != other.GetHashCode()) return false;
@@ -147,4 +153,27 @@ namespace Registrar.Base
         public static bool operator ==(Identifier left, Identifier right) => left.Equals(right);
         public static bool operator !=(Identifier left, Identifier right) => !left.Equals(right);
     }
+
+#if NET8_0_OR_GREATER
+    public class IdentifierConverter : JsonConverter<Identifier>
+    {
+        public override Identifier Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var str = reader.GetString();
+            if (str == null)
+                return default;
+            var parts = str.Split(':');
+            if (parts.Length != 2)
+                return default;
+            return Identifier.TryParse(str, out var id) 
+                ? id.Value 
+                : default;
+        }
+
+        public override void Write(Utf8JsonWriter writer, Identifier value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString());
+        }
+    }
+#endif
 }

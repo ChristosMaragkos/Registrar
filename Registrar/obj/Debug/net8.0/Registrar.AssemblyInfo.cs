@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Lightweight namespaced identifier + registry library with freezing, reverse looku" +
     "ps, and thread-safe bootstrap.")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.1.1.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.1.1+4990ac71e413567bf9e3ccff5f2d135af4d5ac60")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.1.1+6f869fcea4c8311c9439755feaa5cbdc7e7dbe17")]
 [assembly: System.Reflection.AssemblyProductAttribute("Registrar")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Registrar")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.1.1.0")]
