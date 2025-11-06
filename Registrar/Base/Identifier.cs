@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace Registrar.Base
 {
     /// <summary>
-    /// The Identifier struct represents a unique
+    /// The Identifier struct represents an immutable
     /// identifier composed of a namespace and a path.
     /// It can be used to uniquely identify
     /// resources, objects, or files within a given context.
@@ -30,10 +30,8 @@ namespace Registrar.Base
         private static readonly Regex NamespaceRegex = new Regex("^[a-z0-9_\\-.]+$");
         private static readonly Regex PathRegex = new Regex("^[a-z0-9_\\-./]+$");
 
-        private string Namespace { get; }
-        private string Path { get; }
-
-        private readonly int _hash;
+        public string Namespace { get; }
+        public string Path { get; }
 
         private Identifier(string @namespace, string path)
         {
@@ -44,7 +42,6 @@ namespace Registrar.Base
 
             Namespace = @namespace;
             Path = path;
-            _hash = HashCode.Combine(Namespace, Path);
         }
 
         // Namespace and path validation methods.
@@ -136,7 +133,7 @@ namespace Registrar.Base
         // Equality members. Do not touch.
         public bool Equals(Identifier other)
         {
-            if (_hash != other._hash) return false;
+            if (GetHashCode() != other.GetHashCode()) return false;
             return Namespace == other.Namespace && Path == other.Path;
         }
 
@@ -145,7 +142,7 @@ namespace Registrar.Base
             return obj is Identifier other && Equals(other);
         }
 
-        public override int GetHashCode() => _hash;
+        public override int GetHashCode() => HashCode.Combine(Namespace, Path);
         
         public static bool operator ==(Identifier left, Identifier right) => left.Equals(right);
         public static bool operator !=(Identifier left, Identifier right) => !left.Equals(right);

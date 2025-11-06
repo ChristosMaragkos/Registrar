@@ -22,7 +22,7 @@ namespace Registrar.Base
         public static TT Register<T, TT>(Registry<T> registry, Identifier identifier, TT content)
             where T : class where TT : class, T
         {
-            return Registry<T>.Register(registry, identifier, content) as TT
+            return Registry<T>.Register(registry, identifier, content)
                    ?? throw new InvalidCastException(
                        $"Cannot register object {content} to Registry {registry} - Types {typeof(T)} and {typeof(TT)} do not match.");
         }
@@ -30,15 +30,13 @@ namespace Registrar.Base
         public static TT Register<T, TT>(Registry<T> registry, string identifier, TT content)
             where T : class where TT : class, T
         {
-            return Registry<T>.Register(registry, Identifier.Parse(identifier), content) as TT
-                   ?? throw new InvalidCastException(
-                       $"Cannot register object {content} to Registry {registry} - Types {typeof(T)} and {typeof(TT)} do not match.");
+            return Registry<T>.Register(registry, Identifier.Parse(identifier), content);
         }
 
         public abstract void Freeze();
         public abstract bool IsFrozen { get; }
     }
-    
+
     /// <summary>
     /// Abstract base class for registries that map unique identifiers to content of type T.
     /// Supports registration by <see cref="Identifier"/> as well as retrieval by <see cref="Identifier"/> 
@@ -56,7 +54,9 @@ namespace Registrar.Base
         private readonly object _lock = new object();
         private int _nextRawId;
         private readonly Dictionary<Identifier, T> _entriesByIdentifier = new Dictionary<Identifier, T>();
+
         private readonly Dictionary<int, T> _entriesByRawId = new Dictionary<int, T>();
+
         // New reverse lookup dictionaries
         private readonly Dictionary<T, Identifier> _identifierByValue; // one-to-one enforced
         private readonly Dictionary<T, int> _rawIdByValue;
@@ -71,6 +71,7 @@ namespace Registrar.Base
             _identifierByValue = new Dictionary<T, Identifier>(valueComparer);
             _rawIdByValue = new Dictionary<T, int>(valueComparer);
         }
+
         /// <summary>
         /// Registers a new entry in the registry with the specified identifier and content.
         /// If the identifier already exists, the existing content is returned.
@@ -79,7 +80,8 @@ namespace Registrar.Base
         /// <param name="identifier">The unique identifier for the content.</param>
         /// <param name="content">The content to register.</param>
         /// <returns>The registered content, either newly added or already existing.</returns>
-        protected internal static T Register(Registry<T> registry, Identifier identifier, T content)
+        protected internal static TT Register<TT>(Registry<T> registry, Identifier identifier, TT content)
+            where TT : class, T
         {
             // Fast path: prevent entering lock if already frozen and known to reject
             if (registry._frozen)
@@ -88,14 +90,14 @@ namespace Registrar.Base
             {
                 if (registry._frozen)
                     throw new InvalidOperationException("Registry is already frozen");
-                if (registry._entriesByIdentifier.TryGetValue(identifier, out var registeredValue))
-                    return registeredValue; // id already present, return existing value
-                // Enforce uniqueness of value -> identifier
+                if (registry._entriesByIdentifier.TryGetValue(identifier, out _))
+                    throw new DuplicateRegistrationException(
+                        $"Identifier in Registry {registry} already registered: {identifier}");
+
                 if (registry._identifierByValue.TryGetValue(content, out var existingId))
                 {
-                    // If same identifier, treat as idempotent (shouldn't happen since earlier check). If different, throw.
-                    return !existingId.Equals(identifier) 
-                        ? throw new InvalidOperationException($"Value already registered under identifier '{existingId}'. Duplicate registration with '{identifier}' is not allowed.") : content;
+                    throw new DuplicateRegistrationException(
+                        $"Content in Registry {registry} already registered with identifier: {existingId}");
                 }
 
                 var rawId = registry._nextRawId;
@@ -159,7 +161,10 @@ namespace Registrar.Base
         public bool ContainsId(Identifier identifier)
         {
             if (_frozen) return _entriesByIdentifier.ContainsKey(identifier);
-            lock (_lock) { return _entriesByIdentifier.ContainsKey(identifier); }
+            lock (_lock)
+            {
+                return _entriesByIdentifier.ContainsKey(identifier);
+            }
         }
 
         /// <summary>
@@ -170,7 +175,10 @@ namespace Registrar.Base
         public bool ContainsRawId(int rawId)
         {
             if (_frozen) return _entriesByRawId.ContainsKey(rawId);
-            lock (_lock) { return _entriesByRawId.ContainsKey(rawId); }
+            lock (_lock)
+            {
+                return _entriesByRawId.ContainsKey(rawId);
+            }
         }
 
         /// <summary>
@@ -202,8 +210,8 @@ namespace Registrar.Base
         public int? GetRawId(T value)
         {
             if (_frozen)
-                return _rawIdByValue.TryGetValue(value, out var raw) 
-                    ? raw 
+                return _rawIdByValue.TryGetValue(value, out var raw)
+                    ? raw
                     : GetRawIdOnFail();
             lock (_lock)
             {
@@ -212,7 +220,7 @@ namespace Registrar.Base
                     : GetRawIdOnFail();
             }
         }
-        
+
         /// <summary>
         /// Fetches a random entry from the registry.
         /// Uses the provided Random instance to select an entry.
@@ -227,10 +235,11 @@ namespace Registrar.Base
                     ? throw new InvalidOperationException("Cannot retrieve a random entry from an empty registry.")
                     : _entriesByRawId[random.Next(_entriesByRawId.Count)];
             }
+
             lock (_lock)
             {
-                return _entriesByRawId.Count == 0 ?
-                    throw new InvalidOperationException(
+                return _entriesByRawId.Count == 0
+                    ? throw new InvalidOperationException(
                         "Cannot retrieve a random entry from an empty registry.")
                     : _entriesByRawId[random.Next(_entriesByRawId.Count)];
             }
@@ -279,6 +288,7 @@ namespace Registrar.Base
                     snapshot = _entriesByIdentifier.Values.ToList();
                 }
             }
+
             return snapshot.GetEnumerator();
         }
 
@@ -341,5 +351,12 @@ namespace Registrar.Base
         /// Indicates whether the registry is frozen.
         /// </summary>
         bool IsFrozen { get; }
+    }
+
+    public class DuplicateRegistrationException : Exception
+    {
+        public DuplicateRegistrationException(string message) : base(message)
+        {
+        }
     }
 }
